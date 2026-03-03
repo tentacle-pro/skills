@@ -1,0 +1,14 @@
+{
+  "name": "baoyu-compress-image",
+  "type": "module",
+  "scripts": {
+    "start": "bun scripts/main.ts"
+  },
+  "dependencies": {
+    "sharp": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/bun": "latest"
+  }
+}
