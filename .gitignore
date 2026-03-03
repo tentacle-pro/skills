@@ -1,0 +1,15 @@
+# Node/Bun dependencies (TS skills)
+node_modules/
+package-lock.json
+bun.lockb
+yarn.lock
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+.env
+
+# OS generated files
+.DS_Store
+Thumbs.db
