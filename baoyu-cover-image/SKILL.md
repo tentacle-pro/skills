@@ -191,13 +191,9 @@ Files:
 - **Characters**: Simplified silhouettes; NO realistic humans
 - **Title**: Use exact title from user/source; never invent
 
-## Extension Support
+## Configuration
 
-Custom configurations via EXTEND.md. See **Step 0** for paths.
-
-Supports: Watermark | Preferred dimensions | Default aspect/output | Quick mode | Custom palettes | Language
-
-Schema: [references/config/preferences-schema.md](references/config/preferences-schema.md)
+Use `.agents/skills/baoyu-image-gen/.env` for model/provider settings.
 
 ## References
 
@@ -210,4 +206,3 @@ Schema: [references/config/preferences-schema.md](references/config/preferences-
 **Compatibility**: [references/compatibility.md](references/compatibility.md)
 **Visual Elements**: [references/visual-elements.md](references/visual-elements.md)
 **Workflow**: [confirm-options.md](references/workflow/confirm-options.md) | [prompt-template.md](references/workflow/prompt-template.md) | [reference-images.md](references/workflow/reference-images.md)
-**Config**: [preferences-schema.md](references/config/preferences-schema.md) | [first-time-setup.md](references/config/first-time-setup.md) | [watermark-guide.md](references/config/watermark-guide.md)

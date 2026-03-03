@@ -324,7 +324,7 @@ async function main(): Promise<void> {
 
   await loadEnv();
   
-  // Use args directly since EXTEND.md is removed
+  // Use args directly
   const mergedArgs = args;
 
   if (!mergedArgs.quality) mergedArgs.quality = "2k";

@@ -169,6 +169,6 @@ Supported: `1:1`, `16:9`, `9:16`, `4:3`, `3:4`, `2.35:1`
 - Invalid aspect ratio → warning, proceed with default
 - Reference images with unsupported provider/model → error with fix hint (switch to Google multimodal: `gemini-3-pro-image-preview`, `gemini-3.1-flash-image-preview`; or OpenAI GPT Image edits)
 
-## Extension Support
+## Configuration
 
-Custom configurations via EXTEND.md. See **Preferences** section for paths and supported options.
+Use `.agents/skills/baoyu-image-gen/.env` for provider keys and defaults.
