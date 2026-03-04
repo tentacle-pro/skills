@@ -18,7 +18,7 @@ Options:
   -m, --model <id>          Model ID
   --ar <ratio>              Aspect ratio (e.g., 16:9, 1:1, 4:3)
   --size <WxH>              Size (e.g., 1024x1024)
-  --quality normal|2k       Quality preset (default: 2k)
+  --quality normal|2k       Quality preset (default: normal)
   --imageSize 1K|2K|4K      Image size for Google (default: from quality)
   --ref <files...>          Reference images (Google multimodal or OpenAI edits)
   --n <count>               Number of images (default: 1)
@@ -327,7 +327,7 @@ async function main(): Promise<void> {
   // Use args directly
   const mergedArgs = args;
 
-  if (!mergedArgs.quality) mergedArgs.quality = "2k";
+  if (!mergedArgs.quality) mergedArgs.quality = "normal";
 
   let prompt: string | null = mergedArgs.prompt;
   if (!prompt && mergedArgs.promptFiles.length > 0) prompt = await readPromptFromFiles(mergedArgs.promptFiles);
@@ -355,12 +355,12 @@ async function main(): Promise<void> {
   const providerModule = await loadProviderModule(provider);
 
   let model = mergedArgs.model;
-  if (!model && extendConfig.default_model) {
-    if (provider === "google") model = extendConfig.default_model.google ?? null;
-    if (provider === "openai") model = extendConfig.default_model.openai ?? null;
-    if (provider === "dashscope") model = extendConfig.default_model.dashscope ?? null;
-    if (provider === "replicate") model = extendConfig.default_model.replicate ?? null;
-  }
+  // if (!model && extendConfig.default_model) {
+  //   if (provider === "google") model = extendConfig.default_model.google ?? null;
+  //   if (provider === "openai") model = extendConfig.default_model.openai ?? null;
+  //   if (provider === "dashscope") model = extendConfig.default_model.dashscope ?? null;
+  //   if (provider === "replicate") model = extendConfig.default_model.replicate ?? null;
+  // }
   model = model || providerModule.getDefaultModel();
 
   const outputPath = normalizeOutputImagePath(mergedArgs.imagePath);

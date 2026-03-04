@@ -109,6 +109,7 @@ export async function generateImage(
   };
 
   console.log(`Generating image with DashScope (${model})...`, { size });
+  console.log(`URL: ${url}`);
 
   const res = await fetch(url, {
     method: "POST",
