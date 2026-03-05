@@ -1,0 +1,15 @@
+{
+  "default_account": "default",
+  "accounts": {
+    "default": {
+      "alias": "默认账号",
+      "profile_dir": ".agents/skills/redbookskills/.runtime/chrome-profiles/default",
+      "created_at": null
+    },
+    "work": {
+      "alias": "工作账号",
+      "profile_dir": ".agents/skills/redbookskills/.runtime/chrome-profiles/work",
+      "created_at": "2026-01-01T00:00:00"
+    }
+  }
+}
