@@ -42,6 +42,22 @@ This skill only targets **draft box saving** (`draft/add`), not mass-send.
 3. Save draft through `draft/add` with article payload.
 4. `need_open_comment=1`, `only_fans_can_comment=0` by default.
 
+## Official API Mapping
+
+- `draft/add` (`article_type=news`):
+  - `thumb_media_id` must be a permanent `media_id`.
+  - `content` image URLs must come from `media/uploadimg`.
+- `material/add_material?type=image`: cover and other permanent image assets.
+- `media/uploadimg`: inline images for article HTML content.
+
+## Recommended Operation Order
+
+1. Normalize Obsidian image syntax (including `![[...]]`) to standard markdown image form.
+2. Render markdown to HTML.
+3. Upload inline images with `uploadimg` and replace `<img src>` with returned URLs.
+4. Upload cover with permanent material API and get `thumb_media_id`.
+5. Call `draft/add`.
+
 ## Input
 
 - `.md` or `.html`

@@ -16,7 +16,7 @@ interface AccessTokenResponse {
 }
 
 interface UploadResponse {
-  media_id: string;
+  media_id?: string;
   url: string;
   errcode?: number;
   errmsg?: string;
@@ -41,8 +41,11 @@ interface ArticleOptions {
 }
 
 const TOKEN_URL = "https://api.weixin.qq.com/cgi-bin/token";
-const UPLOAD_URL = "https://api.weixin.qq.com/cgi-bin/material/add_material";
+const UPLOAD_PERMANENT_URL = "https://api.weixin.qq.com/cgi-bin/material/add_material";
+const UPLOAD_ARTICLE_IMAGE_URL = "https://api.weixin.qq.com/cgi-bin/media/uploadimg";
 const DRAFT_URL = "https://api.weixin.qq.com/cgi-bin/draft/add";
+
+type UploadMode = "permanent" | "article";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -107,9 +110,50 @@ async function fetchAccessToken(appId: string, appSecret: string): Promise<strin
   return data.access_token;
 }
 
+function normalizeObsidianWikilinkPath(value: string): string {
+  const trimmed = value.trim();
+  const match = trimmed.match(/^\[\[([\s\S]+?)\]\]$/);
+  if (!match) return trimmed;
+  const inner = match[1]!;
+  const noAlias = inner.split("|")[0] ?? inner;
+  return noAlias.split("#")[0]?.trim() || trimmed;
+}
+
+function isImageFilename(name: string): boolean {
+  return /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(name);
+}
+
+function findVaultRoot(startDir: string): string {
+  let current = path.resolve(startDir);
+  while (true) {
+    if (fs.existsSync(path.join(current, "Assets")) || fs.existsSync(path.join(current, ".agents"))) {
+      return current;
+    }
+    const parent = path.dirname(current);
+    if (parent === current) return startDir;
+    current = parent;
+  }
+}
+
+function resolveLocalImagePath(imagePath: string, baseDir?: string): string {
+  const normalized = normalizeObsidianWikilinkPath(imagePath);
+  if (path.isAbsolute(normalized)) return normalized;
+
+  const candidate = path.resolve(baseDir || process.cwd(), normalized);
+  if (fs.existsSync(candidate)) return candidate;
+
+  const basename = path.basename(normalized);
+  const vaultRoot = findVaultRoot(baseDir || process.cwd());
+  const assetsCandidate = path.join(vaultRoot, "Assets", basename);
+  if (fs.existsSync(assetsCandidate)) return assetsCandidate;
+
+  throw new Error(`Image not found: ${candidate}`);
+}
+
 async function uploadImage(
   imagePath: string,
   accessToken: string,
+  mode: UploadMode,
   baseDir?: string
 ): Promise<UploadResponse> {
   let fileBuffer: Buffer;
@@ -130,9 +174,7 @@ async function uploadImage(
     filename = path.basename(urlPath) || "image.jpg";
     contentType = response.headers.get("content-type") || "image/jpeg";
   } else {
-    const resolvedPath = path.isAbsolute(imagePath)
-      ? imagePath
-      : path.resolve(baseDir || process.cwd(), imagePath);
+    const resolvedPath = resolveLocalImagePath(imagePath, baseDir);
 
     if (!fs.existsSync(resolvedPath)) {
       throw new Error(`Image not found: ${resolvedPath}`);
@@ -168,7 +210,9 @@ async function uploadImage(
   const footerBuffer = Buffer.from(footer, "utf-8");
   const body = Buffer.concat([headerBuffer, fileBuffer, footerBuffer]);
 
-  const url = `${UPLOAD_URL}?access_token=${accessToken}&type=image`;
+  const url = mode === "permanent"
+    ? `${UPLOAD_PERMANENT_URL}?access_token=${accessToken}&type=image`
+    : `${UPLOAD_ARTICLE_IMAGE_URL}?access_token=${accessToken}`;
   const res = await fetch(url, {
     method: "POST",
     headers: {
@@ -192,6 +236,7 @@ async function uploadImage(
 async function uploadImagesInHtml(
   html: string,
   accessToken: string,
+  mode: UploadMode,
   baseDir: string
 ): Promise<{ html: string; firstMediaId: string; allMediaIds: string[] }> {
   const imgRegex = /<img[^>]*\ssrc=["']([^"']+)["'][^>]*>/gi;
@@ -219,15 +264,17 @@ async function uploadImagesInHtml(
     const localPathMatch = fullTag.match(/data-local-path=["']([^"']+)["']/);
     const imagePath = localPathMatch ? localPathMatch[1]! : src;
 
-    console.error(`[wechat-api] Uploading image: ${imagePath}`);
+    console.error(`[wechat-api] Uploading image (${mode}): ${imagePath}`);
     try {
-      const resp = await uploadImage(imagePath, accessToken, baseDir);
+      const resp = await uploadImage(imagePath, accessToken, mode, baseDir);
       const newTag = fullTag
         .replace(/\ssrc=["'][^"']+["']/, ` src="${resp.url}"`)
         .replace(/\sdata-local-path=["'][^"']+["']/, "");
       updatedHtml = updatedHtml.replace(fullTag, newTag);
-      allMediaIds.push(resp.media_id);
-      if (!firstMediaId) {
+      if (resp.media_id) {
+        allMediaIds.push(resp.media_id);
+      }
+      if (!firstMediaId && resp.media_id) {
         firstMediaId = resp.media_id;
       }
     } catch (err) {
@@ -312,11 +359,36 @@ function parseFrontmatter(content: string): { frontmatter: Record<string, string
   return { frontmatter, body: match[2]! };
 }
 
-function renderMarkdownToHtml(markdownPath: string, theme: string = "default", color?: string): string {
+function preprocessObsidianEmbedSyntax(markdown: string): string {
+  return markdown.replace(/!\[\[([^\]]+)\]\]/g, (full, inner: string) => {
+    const raw = String(inner || "").trim();
+    const parts = raw.split("|").map((p) => p.trim()).filter(Boolean);
+    const target = (parts[0] || "").split("#")[0]?.trim() || "";
+    if (!target || !isImageFilename(target)) return full;
+
+    const second = parts[1] || "";
+    const isSizeHint = /^\d+(x\d+)?$/i.test(second);
+    const alt = second && !isSizeHint
+      ? second
+      : path.basename(target, path.extname(target));
+    return `![${alt}](${target})`;
+  });
+}
+
+function renderMarkdownToHtml(markdownPath: string, theme: string = "default", color?: string, markdownOverride?: string): string {
   const renderScript = path.join(__dirname, "md", "render.ts");
   const baseDir = path.dirname(markdownPath);
+  let renderInputPath = markdownPath;
 
-  const renderArgs = ["-y", "bun", renderScript, markdownPath, "--theme", theme];
+  if (typeof markdownOverride === "string") {
+    renderInputPath = path.join(
+      baseDir,
+      `${path.basename(markdownPath, ".md")}.wechat-render.tmp.md`
+    );
+    fs.writeFileSync(renderInputPath, markdownOverride, "utf-8");
+  }
+
+  const renderArgs = ["-y", "bun", renderScript, renderInputPath, "--theme", theme];
   if (color) renderArgs.push("--color", color);
 
   console.error(`[wechat-api] Rendering markdown with theme: ${theme}${color ? `, color: ${color}` : ""}`);
@@ -327,15 +399,31 @@ function renderMarkdownToHtml(markdownPath: string, theme: string = "default", c
 
   if (result.status !== 0) {
     const stderr = result.stderr?.toString() || "";
+    if (renderInputPath !== markdownPath && fs.existsSync(renderInputPath)) {
+      fs.unlinkSync(renderInputPath);
+    }
     throw new Error(`Render failed: ${stderr}`);
   }
 
-  const htmlPath = markdownPath.replace(/\.md$/i, ".html");
+  const htmlPath = renderInputPath.replace(/\.md$/i, ".html");
   if (!fs.existsSync(htmlPath)) {
+    if (renderInputPath !== markdownPath && fs.existsSync(renderInputPath)) {
+      fs.unlinkSync(renderInputPath);
+    }
     throw new Error(`HTML file not generated: ${htmlPath}`);
   }
 
-  return htmlPath;
+  const finalHtmlPath = markdownPath.replace(/\.md$/i, ".html");
+  if (htmlPath !== finalHtmlPath) {
+    fs.copyFileSync(htmlPath, finalHtmlPath);
+    fs.unlinkSync(htmlPath);
+    if (fs.existsSync(renderInputPath)) {
+      fs.unlinkSync(renderInputPath);
+    }
+    return finalHtmlPath;
+  }
+
+  return finalHtmlPath;
 }
 
 function extractHtmlContent(htmlPath: string): string {
@@ -504,7 +592,7 @@ async function main(): Promise<void> {
     }
     console.error(`[wechat-api] Using HTML file: ${htmlPath}`);
   } else {
-    const content = fs.readFileSync(filePath, "utf-8");
+    const content = preprocessObsidianEmbedSyntax(fs.readFileSync(filePath, "utf-8"));
     const parsed = parseFrontmatter(content);
     frontmatter = parsed.frontmatter;
     const body = parsed.body;
@@ -518,7 +606,7 @@ async function main(): Promise<void> {
     if (!digest) digest = frontmatter.digest || frontmatter.summary || frontmatter.description || "";
 
     console.error(`[wechat-api] Theme: ${args.theme}${args.color ? `, color: ${args.color}` : ""}`);
-    htmlPath = renderMarkdownToHtml(filePath, args.theme, args.color);
+    htmlPath = renderMarkdownToHtml(filePath, args.theme, args.color, content);
     console.error(`[wechat-api] HTML generated: ${htmlPath}`);
     htmlContent = extractHtmlContent(htmlPath);
   }
@@ -560,6 +648,7 @@ async function main(): Promise<void> {
   const { html: processedHtml, firstMediaId, allMediaIds } = await uploadImagesInHtml(
     htmlContent,
     accessToken,
+    args.articleType === "newspic" ? "permanent" : "article",
     baseDir
   );
   htmlContent = processedHtml;
@@ -570,18 +659,16 @@ async function main(): Promise<void> {
     frontmatter.featureImage ||
     frontmatter.cover ||
     frontmatter.image;
-  const coverPath = rawCoverPath && !path.isAbsolute(rawCoverPath) && args.cover
-    ? path.resolve(process.cwd(), rawCoverPath)
-    : rawCoverPath;
+  const coverPath = rawCoverPath ? normalizeObsidianWikilinkPath(rawCoverPath) : "";
 
   if (coverPath) {
     console.error(`[wechat-api] Uploading cover: ${coverPath}`);
-    const coverResp = await uploadImage(coverPath, accessToken, baseDir);
+    const coverResp = await uploadImage(coverPath, accessToken, "permanent", baseDir);
     thumbMediaId = coverResp.media_id;
   } else if (firstMediaId) {
     if (firstMediaId.startsWith("https://")) {
       console.error(`[wechat-api] Uploading first image as cover: ${firstMediaId}`);
-      const coverResp = await uploadImage(firstMediaId, accessToken, baseDir);
+      const coverResp = await uploadImage(firstMediaId, accessToken, "permanent", baseDir);
       thumbMediaId = coverResp.media_id;
     } else {
       thumbMediaId = firstMediaId;

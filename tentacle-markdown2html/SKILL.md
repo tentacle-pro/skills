@@ -32,6 +32,17 @@ MARKDOWN2HTML_BASE_URL=https://api.tentacle.pro
 - Request payload: `{ markdown, templateId, title? }`
 - Output: html file (default same-name `.html`)
 
+## Preprocessing
+
+- Before request, script normalizes Obsidian image embeds like `![[cover.jpg]]` to standard markdown image syntax.
+- This keeps enterprise behavior aligned with community flow and ensures downstream image extraction/replacement can work consistently.
+
+## WeChat-Oriented Expectation
+
+- The generated HTML is expected to be consumed by `tentacle-post2wechat`, where:
+	- inline images are uploaded with `uploadimg` semantics and rewritten as URL;
+	- cover image is uploaded as permanent material and used as `thumb_media_id`.
+
 ## Example
 
 ```bash

@@ -10,6 +10,26 @@ interface CliArgs {
   dryRun: boolean;
 }
 
+function isImageFilename(name: string): boolean {
+  return /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(name);
+}
+
+function preprocessObsidianEmbedSyntax(markdown: string): string {
+  return markdown.replace(/!\[\[([^\]]+)\]\]/g, (full, inner: string) => {
+    const raw = String(inner || "").trim();
+    const parts = raw.split("|").map((p) => p.trim()).filter(Boolean);
+    const target = (parts[0] || "").split("#")[0]?.trim() || "";
+    if (!target || !isImageFilename(target)) return full;
+
+    const second = parts[1] || "";
+    const isSizeHint = /^\d+(x\d+)?$/i.test(second);
+    const alt = second && !isSizeHint
+      ? second
+      : path.basename(target, path.extname(target));
+    return `![${alt}](${target})`;
+  });
+}
+
 function loadEnvFile(filePath: string): Record<string, string> {
   if (!fs.existsSync(filePath)) return {};
   const out: Record<string, string> = {};
@@ -79,7 +99,7 @@ async function main(): Promise<void> {
   const baseUrl = process.env.MARKDOWN2HTML_BASE_URL || env.MARKDOWN2HTML_BASE_URL || "https://api.tentacle.pro";
   if (!apiKey) throw new Error("Missing API_KEY. Set it in .agents/skills/tentacle-markdown2html/.env");
 
-  const markdown = fs.readFileSync(inputPath, "utf-8");
+  const markdown = preprocessObsidianEmbedSyntax(fs.readFileSync(inputPath, "utf-8"));
   const payload: Record<string, unknown> = {
     markdown,
     templateId: args.templateId,

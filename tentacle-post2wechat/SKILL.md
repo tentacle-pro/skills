@@ -30,6 +30,19 @@ POST2WECHAT_BASE_URL=https://api.tentacle.pro
 3. Upload cover image as permanent material and obtain `thumb_media_id`.
 4. Save to draft box only (`draft/add`).
 
+## Official WeChat API Role Mapping
+
+- Inline article images map to WeChat `media/uploadimg` semantics and return URL for HTML replacement.
+- Cover image maps to WeChat permanent material (`material/add_material?type=image`) and returns `media_id`.
+- Draft save maps to WeChat `draft/add` (`article_type=news`) with `thumb_media_id` + replaced HTML content.
+
+## Recommended Pipeline
+
+1. Receive normalized HTML (or convert markdown in previous step).
+2. Upload inline images and rewrite `<img src>` to returned URLs.
+3. Upload cover image and get `thumb_media_id`.
+4. Submit `draft/add` payload.
+
 ## Required Inputs
 
 - HTML file from previous conversion step
