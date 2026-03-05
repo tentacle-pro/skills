@@ -1,5 +1,5 @@
 ---
-name: RedBookSkills
+name: redbookskills
 description: |
   将图文/视频内容自动发布到小红书（XHS）。
   支持三类任务：发布图文、发布视频、仅启动测试浏览器（不发布）。
