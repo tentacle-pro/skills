@@ -1,6 +1,8 @@
 ---
 name: tentacle-obsidian-init
-description: Initializes an Obsidian vault with a best-practice directory structure, templates, and AI Agent guardrails optimized for text and image content creators. Use when a user asks to set up a new Obsidian vault, organize a messy vault for AI-assisted content creation, or scaffold the creator folder structures and agent rules/standards. Triggers: "initialize vault", "setup obsidian for creator", "scaffold vault", "create creator structure", "init vault".
+description: | 
+  Initializes an Obsidian vault with a best-practice directory structure, templates, and AI Agent guardrails optimized for text and image content creators. Use when a user asks to set up a new Obsidian vault, organize a messy vault for AI-assisted content creation, or scaffold the creator folder structures and agent rules/standards. 
+  Triggers: "initialize vault", "setup obsidian for creator", "scaffold vault", "create creator structure", "init vault".
 ---
 
 # Skill: tentacle-obsidian-init
