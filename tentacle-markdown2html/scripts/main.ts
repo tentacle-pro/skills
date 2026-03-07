@@ -92,12 +92,12 @@ async function main(): Promise<void> {
   const inputPath = path.resolve(args.input);
   if (!fs.existsSync(inputPath)) throw new Error(`Input not found: ${inputPath}`);
 
-  const skillDir = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
-  const env = loadEnvFile(path.join(skillDir, ".env"));
+  const scriptDir = path.dirname(new URL(import.meta.url).pathname);
+  const env = loadEnvFile(path.resolve(scriptDir, "../../.env"));
 
   const apiKey = process.env.API_KEY || env.API_KEY;
   const baseUrl = process.env.MARKDOWN2HTML_BASE_URL || env.MARKDOWN2HTML_BASE_URL || "https://api.tentacle.pro";
-  if (!apiKey) throw new Error("Missing API_KEY. Set it in .agents/skills/tentacle-markdown2html/.env");
+  if (!apiKey) throw new Error("Missing API_KEY. Set it in .agents/skills/.env");
 
   const markdown = preprocessObsidianEmbedSyntax(fs.readFileSync(inputPath, "utf-8"));
   const payload: Record<string, unknown> = {

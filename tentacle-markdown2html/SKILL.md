@@ -10,7 +10,7 @@ description: Enterprise markdown-to-html renderer via API service. Sends markdow
 Call enterprise rendering service instead of local renderer:
 
 - Endpoint: `https://api.tentacle.pro/markdown2html`
-- Auth: `API_KEY` from `.env`
+- Auth: `API_KEY` from `.agents/skills/.env`
 - Supports per-request `templateId`
 
 ## Runtime
@@ -19,7 +19,7 @@ Call enterprise rendering service instead of local renderer:
 bun .agents/skills/tentacle-markdown2html/scripts/main.ts <markdown_file> --template <templateId> [options]
 ```
 
-## .env
+## Shared .env (`.agents/skills/.env`)
 
 ```dotenv
 API_KEY=...

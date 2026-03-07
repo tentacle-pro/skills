@@ -100,7 +100,7 @@ Full template: [references/workflow.md](references/workflow.md#step-4-generate-o
 3. Prompts **MUST** use type-specific templates with structured sections (ZONES / LABELS / COLORS / STYLE / ASPECT)
 4. LABELS **MUST** include article-specific data: actual numbers, terms, metrics, quotes
 5. **DO NOT** pass ad-hoc inline prompts to `--prompt` without saving prompt files first
-6. Environment: ALWAYS rely on `.agents/skills/baoyu-image-gen/.env` for model/provider settings
+6. Environment: ALWAYS rely on `.agents/skills/.env` for model/provider settings
 7. For each prompt file, generate with unified command:
 
 	```bash

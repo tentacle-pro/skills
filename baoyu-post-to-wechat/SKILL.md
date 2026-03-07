@@ -18,7 +18,7 @@ bun .agents/skills/baoyu-post-to-wechat/scripts/wechat-api.ts <file> [options]
 
 ## Credentials
 
-Put credentials in this skill directory `.env`:
+Put credentials in shared `.agents/skills/.env`:
 
 ```dotenv
 WECHAT_APP_ID=...
@@ -27,9 +27,7 @@ WECHAT_APP_SECRET=...
 
 Resolution order:
 1. Process env
-2. `.agents/skills/baoyu-post-to-wechat/.env`
-3. `<cwd>/.baoyu-skills/.env`
-4. `~/.baoyu-skills/.env`
+2. `.agents/skills/.env`
 
 ## Scope
 

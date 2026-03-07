@@ -187,18 +187,14 @@ async function checkBun(): Promise<void> {
 
 async function checkApiCredentials(): Promise<void> {
   const cwd = process.cwd();
-  const projectEnv = path.join(cwd, '.baoyu-skills', '.env');
-  const userEnv = path.join(os.homedir(), '.baoyu-skills', '.env');
+  const sharedEnv = path.join(cwd, '.agents', 'skills', '.env');
 
   let found = false;
-  for (const envPath of [projectEnv, userEnv]) {
-    if (fs.existsSync(envPath)) {
-      const content = fs.readFileSync(envPath, 'utf8');
-      if (content.includes('WECHAT_APP_ID')) {
-        log('API credentials', true, `Found in ${envPath}`);
-        found = true;
-        break;
-      }
+  if (fs.existsSync(sharedEnv)) {
+    const content = fs.readFileSync(sharedEnv, 'utf8');
+    if (content.includes('WECHAT_APP_ID')) {
+      log('API credentials', true, `Found in ${sharedEnv}`);
+      found = true;
     }
   }
 

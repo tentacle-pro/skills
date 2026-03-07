@@ -168,8 +168,8 @@ async function main(): Promise<void> {
   if (!fs.existsSync(inputPath)) throw new Error(`Input html not found: ${inputPath}`);
   const htmlBaseDir = path.dirname(inputPath);
 
-  const skillDir = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
-  const env = loadEnvFile(path.join(skillDir, ".env"));
+  const scriptDir = path.dirname(new URL(import.meta.url).pathname);
+  const env = loadEnvFile(path.resolve(scriptDir, "../../.env"));
   const baseUrl = process.env.POST2WECHAT_BASE_URL || env.POST2WECHAT_BASE_URL || "https://api.tentacle.pro";
   const apiKey = process.env.API_KEY || env.API_KEY;
 
@@ -207,7 +207,7 @@ async function main(): Promise<void> {
     return;
   }
 
-  if (!apiKey) throw new Error("Missing API_KEY. Set it in .agents/skills/tentacle-post2wechat/.env");
+  if (!apiKey) throw new Error("Missing API_KEY. Set it in .agents/skills/.env");
 
   const replacementMap = new Map<string, string>();
 

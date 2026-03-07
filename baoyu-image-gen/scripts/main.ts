@@ -41,7 +41,7 @@ Environment variables:
   DASHSCOPE_BASE_URL        Custom DashScope endpoint
   REPLICATE_BASE_URL        Custom Replicate endpoint
 
-Env file load order: CLI args > process.env > .agents/skills/baoyu-image-gen/.env`);
+Env file load order: CLI args > process.env > .agents/skills/.env`);
 }
 
 function parseArgs(argv: string[]): CliArgs {
@@ -205,7 +205,7 @@ async function loadEnvFile(p: string): Promise<Record<string, string>> {
 }
 
 async function loadEnv(): Promise<void> {
-  const envPath = path.resolve(__dirname, "../.env");
+  const envPath = path.resolve(__dirname, "../../.env");
   const localEnv = await loadEnvFile(envPath);
 
   for (const [k, v] of Object.entries(localEnv)) {
@@ -269,7 +269,7 @@ function detectProvider(args: CliArgs): Provider {
 
   throw new Error(
     "No API key found. Set GOOGLE_API_KEY, GEMINI_API_KEY, OPENAI_API_KEY, DASHSCOPE_API_KEY, or REPLICATE_API_TOKEN.\n" +
-      "Create .agents/skills/baoyu-image-gen/.env with your keys."
+      "Create .agents/skills/.env with your keys."
   );
 }
 

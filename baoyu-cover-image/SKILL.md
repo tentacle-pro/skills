@@ -151,7 +151,7 @@ Save to `prompts/cover.md`. Template: [references/workflow/prompt-template.md](r
 2. **Process references** from prompt frontmatter:
    - `direct` usage → pass via `--ref` (use ref-capable backend)
    - `style`/`palette` → extract traits, append to prompt
-3. **Environment**: ALWAYS explicitly rely on the `.env` at `.agents/skills/baoyu-image-gen/.env` for models.
+3. **Environment**: ALWAYS explicitly rely on the shared `.env` at `.agents/skills/.env` for models.
 4. **Generate**: Execute baoyu-image-gen via the unified command:
    ```bash
    bun .agents/skills/baoyu-image-gen/scripts/main.ts --promptfiles <output-dir>/prompts/cover.md --image <output-dir>/cover.png --ar <aspect>
@@ -193,7 +193,7 @@ Files:
 
 ## Configuration
 
-Use `.agents/skills/baoyu-image-gen/.env` for model/provider settings.
+Use `.agents/skills/.env` for model/provider settings.
 
 ## References
 

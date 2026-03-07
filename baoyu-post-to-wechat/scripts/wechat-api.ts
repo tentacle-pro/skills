@@ -1,6 +1,5 @@
 import fs from "node:fs";
 import path from "node:path";
-import os from "node:os";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
@@ -73,21 +72,17 @@ function loadEnvFile(envPath: string): Record<string, string> {
 }
 
 function loadConfig(): WechatConfig {
-  const skillEnvPath = path.join(__dirname, "..", ".env");
-  const cwdEnvPath = path.join(process.cwd(), ".baoyu-skills", ".env");
-  const homeEnvPath = path.join(os.homedir(), ".baoyu-skills", ".env");
+  const sharedEnvPath = path.resolve(__dirname, "../../.env");
 
-  const skillEnv = loadEnvFile(skillEnvPath);
-  const cwdEnv = loadEnvFile(cwdEnvPath);
-  const homeEnv = loadEnvFile(homeEnvPath);
+  const sharedEnv = loadEnvFile(sharedEnvPath);
 
-  const appId = process.env.WECHAT_APP_ID || skillEnv.WECHAT_APP_ID || cwdEnv.WECHAT_APP_ID || homeEnv.WECHAT_APP_ID;
-  const appSecret = process.env.WECHAT_APP_SECRET || skillEnv.WECHAT_APP_SECRET || cwdEnv.WECHAT_APP_SECRET || homeEnv.WECHAT_APP_SECRET;
+  const appId = process.env.WECHAT_APP_ID || sharedEnv.WECHAT_APP_ID;
+  const appSecret = process.env.WECHAT_APP_SECRET || sharedEnv.WECHAT_APP_SECRET;
 
   if (!appId || !appSecret) {
     throw new Error(
       "Missing WECHAT_APP_ID or WECHAT_APP_SECRET.\n" +
-      "Set via environment variables, .agents/skills/baoyu-post-to-wechat/.env, or .baoyu-skills/.env."
+      "Set via environment variables or .agents/skills/.env."
     );
   }
 
@@ -471,9 +466,7 @@ Environment Variables:
 
 Config File Locations (in priority order):
   1. Environment variables
-  2. .agents/skills/baoyu-post-to-wechat/.env
-  3. <cwd>/.baoyu-skills/.env
-  4. ~/.baoyu-skills/.env
+  2. .agents/skills/.env
 
 Example:
   npx -y bun wechat-api.ts article.md

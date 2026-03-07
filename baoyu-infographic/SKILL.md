@@ -197,7 +197,7 @@ Combine:
 
 ### Step 6: Generate Image
 
-1. **Environment**: ALWAYS explicitly rely on the `.env` at `.agents/skills/baoyu-image-gen/.env` for models.
+1. **Environment**: ALWAYS explicitly rely on the shared `.env` at `.agents/skills/.env` for models.
 2. **Check for existing file**: Before generating, check if `infographic.png` exists
    - If exists: Rename to `infographic-backup-YYYYMMDD-HHMMSS.png`
 3. **Generate**: Execute baoyu-image-gen via the unified command:

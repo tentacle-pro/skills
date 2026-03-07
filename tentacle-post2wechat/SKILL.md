@@ -16,7 +16,7 @@ Server resolves `API_KEY -> AppID/AppSecret`, caches/refreshes WeChat tokens, th
 bun .agents/skills/tentacle-post2wechat/scripts/main.ts <html_file> [options]
 ```
 
-## .env
+## Shared .env (`.agents/skills/.env`)
 
 ```dotenv
 API_KEY=...

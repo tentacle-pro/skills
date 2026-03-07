@@ -81,7 +81,7 @@ bun .agents/skills/baoyu-image-gen/scripts/main.ts --prompt "A cat" --image out.
 | `DASHSCOPE_BASE_URL` | Custom DashScope endpoint |
 | `REPLICATE_BASE_URL` | Custom Replicate endpoint |
 
-**Load Priority**: CLI args > env vars > `.agents/skills/baoyu-image-gen/.env`
+**Load Priority**: CLI args > env vars > `.agents/skills/.env`
 
 ## Model Resolution
 
@@ -171,4 +171,4 @@ Supported: `1:1`, `16:9`, `9:16`, `4:3`, `3:4`, `2.35:1`
 
 ## Configuration
 
-Use `.agents/skills/baoyu-image-gen/.env` for provider keys and defaults.
+Use `.agents/skills/.env` for provider keys and defaults.
