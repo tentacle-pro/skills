@@ -95,9 +95,10 @@ async function main(): Promise<void> {
   const scriptDir = path.dirname(new URL(import.meta.url).pathname);
   const env = loadEnvFile(path.resolve(scriptDir, "../../.env"));
 
-  const apiKey = process.env.API_KEY || env.API_KEY;
+  const apiKey = process.env.APP_SECRET || env.APP_SECRET;
+  const appId = process.env.APP_ID || env.APP_ID || "";
   const baseUrl = process.env.MARKDOWN2HTML_BASE_URL || env.MARKDOWN2HTML_BASE_URL || "https://api.tentacle.pro";
-  if (!apiKey) throw new Error("Missing API_KEY. Set it in .agents/skills/.env");
+  if (!apiKey) throw new Error("Missing APP_SECRET. Set it in .agents/skills/.env");
 
   const markdown = preprocessObsidianEmbedSyntax(fs.readFileSync(inputPath, "utf-8"));
   const payload: Record<string, unknown> = {
@@ -112,7 +113,7 @@ async function main(): Promise<void> {
     headers: {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${apiKey}`,
-      "X-API-Key": apiKey,
+      "X-App-ID": appId,
     },
     body: JSON.stringify(payload),
   });

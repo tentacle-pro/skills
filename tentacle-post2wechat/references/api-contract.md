@@ -1,9 +1,11 @@
 # API Contract (Client → api.tentacle.pro)
 
-All endpoints require either:
+All endpoints require:
 
-- `Authorization: Bearer <API_KEY>`
-- or `X-API-Key: <API_KEY>`
+- `Authorization: Bearer <APP_SECRET>`
+- `X-App-ID: <APP_ID>` (optional, but recommended for defense-in-depth)
+
+Server maps `APP_ID + sha256(APP_SECRET)` → client record → WeChat account binding.
 
 ## 1) Upload Cover (Permanent Material)
 
@@ -17,8 +19,11 @@ Response:
 ```json
 {
   "ok": true,
-  "media_id": "MEDIA_ID",
-  "url": "https://mmbiz.qpic.cn/..."
+  "request_id": "...",
+  "data": {
+    "media_id": "MEDIA_ID",
+    "url": "https://mmbiz.qpic.cn/..."
+  }
 }
 ```
 
@@ -34,7 +39,10 @@ Response:
 ```json
 {
   "ok": true,
-  "url": "https://mmbiz.qpic.cn/..."
+  "request_id": "...",
+  "data": {
+    "url": "https://mmbiz.qpic.cn/..."
+  }
 }
 ```
 
@@ -59,7 +67,10 @@ Response:
 ```json
 {
   "ok": true,
-  "media_id": "DRAFT_MEDIA_ID"
+  "request_id": "...",
+  "data": {
+    "media_id": "DRAFT_MEDIA_ID"
+  }
 }
 ```
 

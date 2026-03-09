@@ -1,6 +1,6 @@
 # RedBookSkills
 
-
+[原项目地址](https://github.com/white0dew/XiaohongshuSkills) 
 
 自动发布内容到小红书（Xiaohongshu/RED）的命令行工具，也支持仅启动测试浏览器（不发布）。
 通过 Chrome DevTools Protocol (CDP) 实现自动化发布，支持多账号管理、无头模式运行、自动搜索素材与内容数据抓取等功能。
