@@ -19,9 +19,8 @@ bun .agents/skills/tentacle-post2wechat/scripts/main.ts <html_file> [options]
 ## Shared .env (`.agents/skills/.env`)
 
 ```dotenv
-APP_ID=your_client_id
-APP_SECRET=your_client_secret
-POST2WECHAT_BASE_URL=https://api.tentacle.pro
+API_KEY=tentacle-xxx
+TENTACLE_BASE_URL=https://api.tentacle.pro
 ```
 
 ## Behavior

@@ -116,8 +116,7 @@ function compressLocalImageIfNeeded(inputPath: string, baseDir: string): string 
 
 async function uploadByPathOrUrl(
   baseUrl: string,
-  appId: string,
-  appSecret: string,
+  apiKey: string,
   endpoint: string,
   image: string,
 ): Promise<any> {
@@ -136,8 +135,7 @@ async function uploadByPathOrUrl(
   const response = await fetch(url, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${appSecret}`,
-      "X-App-ID": appId,
+      Authorization: `Bearer ${apiKey}`,
     },
     body: form,
   });
@@ -152,8 +150,7 @@ async function uploadByPathOrUrl(
 
 async function saveDraft(
   baseUrl: string,
-  appId: string,
-  appSecret: string,
+  apiKey: string,
   payload: Record<string, unknown>,
 ): Promise<any> {
   const url = `${baseUrl.replace(/\/$/, "")}/post2wechat/draft/add`;
@@ -161,8 +158,7 @@ async function saveDraft(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${appSecret}`,
-      "X-App-ID": appId,
+      Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify(payload),
   });
@@ -182,9 +178,8 @@ async function main(): Promise<void> {
 
   const scriptDir = path.dirname(new URL(import.meta.url).pathname);
   const env = loadEnvFile(path.resolve(scriptDir, "../../.env"));
-  const baseUrl = process.env.POST2WECHAT_BASE_URL || env.POST2WECHAT_BASE_URL || "https://api.tentacle.pro";
-  const appId = process.env.APP_ID || env.APP_ID || "";
-  const appSecret = process.env.APP_SECRET || env.APP_SECRET;
+  const baseUrl = process.env.TENTACLE_BASE_URL || env.TENTACLE_BASE_URL || "https://api.tentacle.pro";
+  const apiKey = process.env.API_KEY || env.API_KEY;
 
   let html = fs.readFileSync(inputPath, "utf-8");
   const fallbackName = path.basename(inputPath, path.extname(inputPath));
@@ -220,15 +215,14 @@ async function main(): Promise<void> {
     return;
   }
 
-  if (!appSecret) throw new Error("Missing APP_SECRET. Set it in .agents/skills/.env");
-  if (!appId) throw new Error("Missing APP_ID. Set it in .agents/skills/.env");
+  if (!apiKey) throw new Error("Missing API_KEY. Set it in .agents/skills/.env");
 
   const replacementMap = new Map<string, string>();
 
   for (const src of imgSources) {
     if (src.startsWith("https://mmbiz.qpic.cn") || src.startsWith("http://mmbiz.qpic.cn")) continue;
     const uploadSource = compressLocalImageIfNeeded(src, htmlBaseDir);
-    const uploaded = await uploadByPathOrUrl(baseUrl, appId, appSecret, "/post2wechat/upload/article-image", uploadSource);
+    const uploaded = await uploadByPathOrUrl(baseUrl, apiKey, "/post2wechat/upload/article-image", uploadSource);
     if (!uploaded?.url) throw new Error(`Inline image upload returned no url: ${src}`);
     replacementMap.set(src, uploaded.url);
   }
@@ -239,7 +233,7 @@ async function main(): Promise<void> {
   }
 
   const compressedCover = compressLocalImageIfNeeded(coverSource, htmlBaseDir);
-  const coverResp = await uploadByPathOrUrl(baseUrl, appId, appSecret, "/post2wechat/upload/permanent-image", compressedCover);
+  const coverResp = await uploadByPathOrUrl(baseUrl, apiKey, "/post2wechat/upload/permanent-image", compressedCover);
   const thumbMediaId = coverResp?.media_id;
   if (!thumbMediaId) throw new Error("Cover upload returned no media_id");
 
@@ -253,7 +247,7 @@ async function main(): Promise<void> {
     only_fans_can_comment: 0,
   };
 
-  const draftResp = await saveDraft(baseUrl, appId, appSecret, payload);
+  const draftResp = await saveDraft(baseUrl, apiKey, payload);
   console.log(JSON.stringify({ ok: true, title, media_id: draftResp?.media_id || "", draftResponse: draftResp }, null, 2));
 }
 

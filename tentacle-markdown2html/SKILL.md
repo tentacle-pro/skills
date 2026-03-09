@@ -22,9 +22,8 @@ bun .agents/skills/tentacle-markdown2html/scripts/main.ts <markdown_file> --temp
 ## Shared .env (`.agents/skills/.env`)
 
 ```dotenv
-APP_ID=your_client_id
-APP_SECRET=your_client_secret
-MARKDOWN2HTML_BASE_URL=https://api.tentacle.pro
+API_KEY=tentacle-xxx
+TENTACLE_BASE_URL=https://api.tentacle.pro
 ```
 
 ## Input/Output
