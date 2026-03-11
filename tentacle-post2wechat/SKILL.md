@@ -55,7 +55,7 @@ bun .agents/skills/tentacle-post2wechat/scripts/main.ts article.html \
   --cover Assets/Cover-Images/topic/cover.jpg \
   --title "标题" \
   --author "作者" \
-  --summary "摘要"
+  --summary "摘要（不超过120字）"
 ```
 
 ## API Contract
