@@ -32,6 +32,16 @@ TENTACLE_BASE_URL=https://api.tentacle.pro
 - Request payload: `{ markdown, templateId, title? }`
 - Output: html file (default same-name `.html`)
 
+## Options
+
+| Flag | Description |
+|------|-------------|
+| `--template <id>` | Template ID, default `preset-classic` |
+| `--output <path>` | Output HTML path |
+| `--title <text>` | Title override |
+| `--summary <text>` | Article summary (max 120 chars). Injected as `summary:` into frontmatter so the renderer displays it as a themed lead block after the h1. Use this when the markdown has no frontmatter or when the agent dynamically generates a summary. |
+| `--dry-run` | Fetch only, skip file write |
+
 ## Preprocessing
 
 - Before request, script normalizes Obsidian image embeds like `![[cover.jpg]]` to standard markdown image syntax.
@@ -46,5 +56,7 @@ TENTACLE_BASE_URL=https://api.tentacle.pro
 ## Example
 
 ```bash
-bun .agents/skills/tentacle-markdown2html/scripts/main.ts 02\ Projects/article.md --template corp-a-v3
+bun .agents/skills/tentacle-markdown2html/scripts/main.ts 02\ Projects/article.md \
+  --template preset-classic \
+  --summary "早餐是一个向量空间。煎饼、可丽饼和炒蛋安置在一个单纯形上，是否存在从未被探索的'暗早餐'？"
 ```

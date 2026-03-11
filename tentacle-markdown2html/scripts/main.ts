@@ -7,6 +7,7 @@ interface CliArgs {
   templateId?: string;
   output?: string;
   title?: string;
+  summary?: string;
   dryRun: boolean;
 }
 
@@ -54,9 +55,10 @@ function parseArgs(argv: string[]): CliArgs {
     console.log(`Usage: bun .agents/skills/tentacle-markdown2html/scripts/main.ts <markdown_file> --template <templateId> [options]
 
 Options:
-  --template <id>   Template ID (default: $TEMPLATE_ID env var, then "default-simple")
+  --template <id>   Template ID (default: $TEMPLATE_ID env var, then "preset-classic")
   --output <path>   Output html path
   --title <text>    Optional title override
+  --summary <text>  Article summary injected as frontmatter (max 120 chars, shown as lead block)
   --dry-run         Request only, no file write
   -h, --help        Show help`);
     process.exit(0);
@@ -72,6 +74,7 @@ Options:
     if (arg === "--template" && argv[i + 1]) args.templateId = argv[++i]!;
     else if (arg === "--output" && argv[i + 1]) args.output = argv[++i]!;
     else if (arg === "--title" && argv[i + 1]) args.title = argv[++i]!;
+    else if (arg === "--summary" && argv[i + 1]) args.summary = argv[++i]!;
     else if (arg === "--dry-run") args.dryRun = true;
   }
 
@@ -98,10 +101,23 @@ async function main(): Promise<void> {
   const isDev = (process.env.NODE_ENV || env.NODE_ENV) === 'development';
   const defaultBaseUrl = isDev ? 'http://127.0.0.1:3001' : 'https://api.tentacle.pro';
   const baseUrl = process.env.TENTACLE_BASE_URL || env.TENTACLE_BASE_URL || defaultBaseUrl;
-  const templateId = args.templateId || process.env.TEMPLATE_ID || env.TEMPLATE_ID || "default-simple";
+  const templateId = args.templateId || process.env.TEMPLATE_ID || env.TEMPLATE_ID || "preset-classic";
   if (!apiKey) throw new Error("Missing API_KEY. Set it in .agents/skills/.env");
 
-  const markdown = preprocessObsidianEmbedSyntax(fs.readFileSync(inputPath, "utf-8"));
+  const rawMarkdown = preprocessObsidianEmbedSyntax(fs.readFileSync(inputPath, "utf-8"));
+  // Inject --summary into frontmatter so the renderer can display it as a lead block.
+  // If the file already has a frontmatter block we append the field; otherwise we prepend one.
+  let markdown = rawMarkdown;
+  if (args.summary) {
+    const summaryLine = `summary: ${args.summary.replace(/\n/g, ' ')}`;
+    const frontmatterMatch = markdown.match(/^---\n([\s\S]*?)\n---\n/);
+    if (frontmatterMatch) {
+      // Insert inside existing frontmatter block
+      markdown = markdown.replace(/^(---\n[\s\S]*?)(\n---)/, `$1\n${summaryLine}$2`);
+    } else {
+      markdown = `---\n${summaryLine}\n---\n\n${markdown}`;
+    }
+  }
   const payload: Record<string, unknown> = {
     markdown,
     templateId,

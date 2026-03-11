@@ -19,8 +19,7 @@ bun .agents/skills/tentacle-post2wechat/scripts/main.ts <html_file> [options]
 ## Shared .env (`.agents/skills/.env`)
 
 ```dotenv
-API_KEY=tentacle-xxx
-TENTACLE_BASE_URL=https://api.tentacle.pro
+API_KEY=tpk_...
 ```
 
 ## Behavior
@@ -38,14 +37,15 @@ TENTACLE_BASE_URL=https://api.tentacle.pro
 
 ## Recommended Pipeline
 
-1. Receive normalized HTML (or convert markdown in previous step).
-2. Upload inline images and rewrite `<img src>` to returned URLs.
-3. Upload cover image and get `thumb_media_id`.
-4. Submit `draft/add` payload.
+1. **If input is `.md`**: proactively invoke the `tentacle-markdown2html` skill first to convert it to HTML, then continue with the steps below. Do not ask the user to do this manually.
+2. Receive normalized HTML (or convert markdown in previous step).
+3. Upload inline images and rewrite `<img src>` to returned URLs.
+4. Upload cover image and get `thumb_media_id`.
+5. Submit `draft/add` payload.
 
 ## Required Inputs
 
-- HTML file from previous conversion step
+- HTML file (auto-generated from `.md` via `tentacle-markdown2html` if needed)
 - Cover image (`--cover`) or first inline image fallback
 
 ## Example

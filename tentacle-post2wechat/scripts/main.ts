@@ -91,8 +91,18 @@ function extractImageSources(html: string): string[] {
 
 function compressLocalImageIfNeeded(inputPath: string, baseDir: string): string {
   if (inputPath.startsWith("http://") || inputPath.startsWith("https://")) return inputPath;
-  const absInput = path.isAbsolute(inputPath) ? inputPath : path.resolve(baseDir, inputPath);
-  if (!fs.existsSync(absInput)) throw new Error(`Image not found: ${absInput}`);
+  
+  let absInput = path.isAbsolute(inputPath) ? inputPath : path.resolve(baseDir, inputPath);
+  
+  // 修复：如果 HTML 所在目录找不到图片，尝试去根目录的 Assets/ 文件夹查找
+  if (!fs.existsSync(absInput)) {
+    const assetsFallback = path.resolve(process.cwd(), "Assets", inputPath);
+    if (fs.existsSync(assetsFallback)) {
+      absInput = assetsFallback;
+    } else {
+      throw new Error(`Image not found: ${absInput} (also checked Assets/)`);
+    }
+  }
 
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "tentacle-post2wechat-"));
   const outputPath = path.join(tempDir, `${path.basename(absInput, path.extname(absInput))}.jpg`);

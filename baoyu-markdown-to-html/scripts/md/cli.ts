@@ -6,7 +6,6 @@ import {
   CODE_BLOCK_THEMES,
 } from "./constants.js";
 import { THEME_NAMES } from "./themes.js";
-import { loadExtendConfig } from "./extend-config.js";
 
 export function printUsage(): void {
   console.error(
@@ -48,20 +47,18 @@ function resolveColor(value: string): string {
 }
 
 export function parseArgs(argv: string[]): CliOptions | null {
-  const ext = loadExtendConfig();
-
   let inputPath = "";
-  let theme: ThemeName = ext.default_theme ?? "default";
-  let keepTitle = ext.keep_title ?? false;
-  let primaryColor: string | undefined = ext.default_color ? resolveColor(ext.default_color) : undefined;
-  let fontFamily: string | undefined = ext.default_font_family ? resolveFontFamily(ext.default_font_family) : undefined;
-  let fontSize: string | undefined = ext.default_font_size ?? undefined;
-  let codeTheme = ext.default_code_theme ?? "github";
-  let isMacCodeBlock = ext.mac_code_block ?? true;
-  let isShowLineNumber = ext.show_line_number ?? false;
-  let citeStatus = ext.cite ?? false;
-  let countStatus = ext.count ?? false;
-  let legend = ext.legend ?? "alt";
+  let theme: ThemeName = "default";
+  let keepTitle = false;
+  let primaryColor: string | undefined = undefined;
+  let fontFamily: string | undefined = undefined;
+  let fontSize: string | undefined = undefined;
+  let codeTheme = "github";
+  let isMacCodeBlock = true;
+  let isShowLineNumber = false;
+  let citeStatus = false;
+  let countStatus = false;
+  let legend = "alt";
 
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i]!;
