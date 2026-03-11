@@ -178,7 +178,9 @@ async function main(): Promise<void> {
 
   const scriptDir = path.dirname(new URL(import.meta.url).pathname);
   const env = loadEnvFile(path.resolve(scriptDir, "../../.env"));
-  const baseUrl = process.env.TENTACLE_BASE_URL || env.TENTACLE_BASE_URL || "https://api.tentacle.pro";
+  const isDev = (process.env.NODE_ENV || env.NODE_ENV) === 'development';
+  const defaultBaseUrl = isDev ? 'http://127.0.0.1:3001' : 'https://api.tentacle.pro';
+  const baseUrl = process.env.TENTACLE_BASE_URL || env.TENTACLE_BASE_URL || defaultBaseUrl;
   const apiKey = process.env.API_KEY || env.API_KEY;
 
   let html = fs.readFileSync(inputPath, "utf-8");

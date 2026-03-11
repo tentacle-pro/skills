@@ -4,7 +4,7 @@ import path from "node:path";
 
 interface CliArgs {
   input: string;
-  templateId: string;
+  templateId?: string;
   output?: string;
   title?: string;
   dryRun: boolean;
@@ -54,7 +54,7 @@ function parseArgs(argv: string[]): CliArgs {
     console.log(`Usage: bun .agents/skills/tentacle-markdown2html/scripts/main.ts <markdown_file> --template <templateId> [options]
 
 Options:
-  --template <id>   Template ID (required)
+  --template <id>   Template ID (default: $TEMPLATE_ID env var, then "default-simple")
   --output <path>   Output html path
   --title <text>    Optional title override
   --dry-run         Request only, no file write
@@ -62,7 +62,7 @@ Options:
     process.exit(0);
   }
 
-  const args: CliArgs = { input: "", templateId: "", dryRun: false };
+  const args: CliArgs = { input: "", dryRun: false };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i]!;
     if (!arg.startsWith("-") && !args.input) {
@@ -76,7 +76,6 @@ Options:
   }
 
   if (!args.input) throw new Error("Missing markdown file path");
-  if (!args.templateId) throw new Error("Missing --template <templateId>");
   return args;
 }
 
@@ -96,13 +95,16 @@ async function main(): Promise<void> {
   const env = loadEnvFile(path.resolve(scriptDir, "../../.env"));
 
   const apiKey = process.env.API_KEY || env.API_KEY;
-  const baseUrl = process.env.TENTACLE_BASE_URL || env.TENTACLE_BASE_URL || "https://api.tentacle.pro";
+  const isDev = (process.env.NODE_ENV || env.NODE_ENV) === 'development';
+  const defaultBaseUrl = isDev ? 'http://127.0.0.1:3001' : 'https://api.tentacle.pro';
+  const baseUrl = process.env.TENTACLE_BASE_URL || env.TENTACLE_BASE_URL || defaultBaseUrl;
+  const templateId = args.templateId || process.env.TEMPLATE_ID || env.TEMPLATE_ID || "default-simple";
   if (!apiKey) throw new Error("Missing API_KEY. Set it in .agents/skills/.env");
 
   const markdown = preprocessObsidianEmbedSyntax(fs.readFileSync(inputPath, "utf-8"));
   const payload: Record<string, unknown> = {
     markdown,
-    templateId: args.templateId,
+    templateId,
   };
   if (args.title) payload.title = args.title;
 
@@ -122,7 +124,13 @@ async function main(): Promise<void> {
   }
 
   const html = normalizeResultHtml(data);
-  const outputPath = path.resolve(args.output || inputPath.replace(/\.md$/i, ".html"));
+  const defaultOutputPath = inputPath.replace(/\.md$/i, ".html");
+  let resolvedOutput = path.resolve(args.output || defaultOutputPath);
+  // 如果 --output 指向的是一个目录，则在该目录下写同名 .html
+  if (args.output && fs.existsSync(resolvedOutput) && fs.statSync(resolvedOutput).isDirectory()) {
+    resolvedOutput = path.join(resolvedOutput, path.basename(defaultOutputPath));
+  }
+  const outputPath = resolvedOutput;
 
   if (!args.dryRun) {
     fs.writeFileSync(outputPath, html, "utf-8");
@@ -133,7 +141,7 @@ async function main(): Promise<void> {
     endpoint,
     inputPath,
     outputPath,
-    templateId: args.templateId,
+    templateId,
     written: !args.dryRun,
   }, null, 2));
 }
