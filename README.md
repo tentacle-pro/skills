@@ -24,6 +24,40 @@
 - 如果安装了Bun环境，可以使用以下命令安装技能：
 `bunx skills add tentacle-pro/skills`
 
+在`.agents/skills/` 目录下新建`.env` 文件，粘贴以下内容并按你的情况修改：
+
+```dotenv
+# ----------------------
+# for baoyu-image-gen
+# OpenAI
+OPENAI_API_KEY=sk-xxx
+OPENAI_IMAGE_MODEL=gpt-image-1.5
+# OPENAI_BASE_URL=https://api.openai.com/v1
+
+# Google
+GOOGLE_API_KEY=
+GOOGLE_IMAGE_MODEL=gemini-3-pro-image-preview
+# GOOGLE_BASE_URL=https://generativelanguage.googleapis.com/v1beta
+
+# DashScope（阿里通义万相）
+DASHSCOPE_API_KEY=sk-xxx
+DASHSCOPE_IMAGE_MODEL=qwen-image-2512
+# DASHSCOPE_BASE_URL=https://dashscope.aliyuncs.com
+
+
+# -----------------------
+# for baoyu-post-to-wechat [发布到微信公众号草稿箱 - 社区版，从本机发出]
+WECHAT_APP_ID=
+WECHAT_APP_SECRET=
+
+
+# -----------------------
+# for tentacle-markdown2html tentacle-post2wechat [发布到微信公众号草稿箱 - 企业版，使用在线服务器]
+API_KEY=tpk-xxx
+# TEMPLATE_ID=preset-classic
+
+```
+
 ## 最佳实践
 
 - 调用 `tentacle-obsidian-init` 技能来快速设置你的Obsidian环境，确保你的目录结构符合[PARA](https://fortelabs.com/blog/para/) 原则，个人认为这也是最适合“图文内容创作者”的目录结构。
