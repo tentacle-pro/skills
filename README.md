@@ -19,10 +19,10 @@
 ## 安装过程
 
 - 如果安装了Node.js环境，可以使用以下命令安装技能：
-`npx -y skills add tentacle-pro/skills --all`
+`npx -y skills add tentacle-pro/skills`
 
 - 如果安装了Bun环境，可以使用以下命令安装技能：
-`bunx skills add tentacle-pro/skills --all`
+`bunx skills add tentacle-pro/skills`
 
 ## 最佳实践
 
