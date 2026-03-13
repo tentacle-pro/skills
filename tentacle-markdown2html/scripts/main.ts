@@ -95,7 +95,11 @@ async function main(): Promise<void> {
   if (!fs.existsSync(inputPath)) throw new Error(`Input not found: ${inputPath}`);
 
   const scriptDir = path.dirname(new URL(import.meta.url).pathname);
-  const env = loadEnvFile(path.resolve(scriptDir, "../../.env"));
+  // main.ts is at .agents/skills/tentacle-markdown2html/scripts/main.ts
+  // .env is at .agents/skills/.env
+  // So we need to go up 2 levels: scripts -> tentacle-markdown2html -> .agents/skills
+  const sharedEnvPath = path.resolve(scriptDir, "../../.env");
+  const env = loadEnvFile(sharedEnvPath);
 
   const apiKey = process.env.API_KEY || env.API_KEY;
   const isDev = (process.env.NODE_ENV || env.NODE_ENV) === 'development';
