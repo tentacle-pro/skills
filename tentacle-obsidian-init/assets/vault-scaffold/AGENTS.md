@@ -1,52 +1,73 @@
-# 🤖 AGENTS — Vault Operating Rules
+# AGENTS.md — 知识库操作指南
 
-> **All AI agents working in this vault MUST read this file before creating or modifying any content.**
+这是一个基于 **PARA 方法**组织的 Obsidian 知识库，服务于**图文内容创作者**。
 
-This is an **Obsidian Vault** for a content creator (text & image). It doubles as a long-term second brain. Follow the folder conventions below strictly to keep the vault coherent.
-
----
-
-## Vault Architecture
-
-| Folder | Purpose | When to write here |
-|--------|---------|-------------------|
-| `00 Inbox/` | Unprocessed captures | Raw ideas, links, drafts that haven't been categorised yet |
-| `Daily/` | Daily notes | One file per day, named `YYYY-MM-DD.md` |
-| `01 Notes/` | Evergreen notes | One atomic concept per file; use a full-sentence title |
-| `02 Projects/` | Active content projects | Has a defined deliverable and end date; use `Templates/Project.md` |
-| `03 Resources/Inspiration/` | Visual & conceptual references | Screenshots, mood boards, reference images |
-| `03 Resources/Swipe File/` | Copy & composition examples | Headline swipes, caption references, layout samples |
-| `03 Resources/Tools & Workflow/` | Tool & process notes | How-to and config notes for software / workflows |
-| `04 Areas/` | Ongoing responsibilities | No end date; e.g. brand identity, platform strategy, audience |
-| `Archive/` | Completed or paused work | Move here when done; never delete |
-| `Assets/` | Local media attachments | Images and files embedded in notes; do NOT put `.md` files here |
-| `Templates/` | Note templates | Do not create content here; only template scaffolding |
-| `.agents/skills/` | Agent skill code | All skill source code lives here; managed by Git |
-
-### Hard Rules
-
-- **CWD is the vault root.** All relative paths must resolve from here.
-- **Git boundary:** Only `.agents/skills/` is a Git repo. Do NOT run `git init` at vault root.
-- **No artefacts in note folders.** Keep logs, temp files, and build output inside `.agents/skills/<skill-name>/`.
-- **Preserve YAML frontmatter** when reading or editing any `.md` file.
-- **Use wikilink syntax** `[[Page Name]]` for cross-references between notes.
-- **Attachments** go in `Assets/` — set Obsidian's default attachment path accordingly.
+在执行任何文件操作前，请先阅读本文件。
 
 ---
 
-## File Naming Conventions
+## 文件夹速查
 
-| Type | Convention | Example |
-|------|-----------|---------|
-| Daily note | `YYYY-MM-DD.md` | `2026-03-03.md` |
-| Evergreen note | One-sentence claim | `优质内容需要先建立受众信任.md` |
-| Project | Prefix with type | `文章 - XX平台内容计划 2026Q1.md` |
-| Resource | Descriptive title | `Instagram 竖版构图参考.md` |
+| 文件夹 | 存放什么 |
+|---|---|
+| `Projects/` | 有明确完成条件的进行中项目（文章、策划、活动等） |
+| `Areas/` | 长期维护的责任领域（选题方向、渠道运营、读者研究等） |
+| `Resources/` | 按主题组织的参考资料、灵感素材、读书笔记 |
+| `Archives/` | 已完成/不再活跃的 Projects、Areas、Resources |
+| `Daily/` | 每日笔记，命名格式 `YYYY-MM-DD.md` |
+| `Templates/` | 笔记模板，只存模板文件 |
+| `Clippings/` | Web Clipper 自动写入的临时 Inbox，需定期清空分发 |
 
 ---
 
-## Skill Development Standards
+## 新文件应该放哪里？— 决策树
 
-For Python (`uv`) and TypeScript (`bun`) runtime conventions, dependency management, and environment setup, **agents MUST also read**:
+```
+收到新内容
+    ↓
+是否服务于某个有截止条件的具体目标？
+├── 是 → Projects/<项目名>/
+└── 否
+      ↓
+    是否是需要长期维护的责任/标准？
+    ├── 是 → Areas/<领域名>/
+    └── 否
+          ↓
+        是否是感兴趣主题的参考资料或素材？
+        ├── 是 → Resources/<主题名>/
+        └── 不确定 → Daily/<今日日期>.md 的 Inbox 区块
+```
 
-→ **[.agents/skills/AGENTS.md](.agents/skills/AGENTS.md)**
+---
+
+## 常见操作规则
+
+**创建新文件**
+- 先用上方决策树确定目标文件夹
+- 优先使用 `Templates/` 中对应的模板
+- 文件名用中文或英文均可，避免特殊符号
+
+**保存网页/剪藏内容**
+- 不要默认写入 `Clippings/`
+- 直接按决策树写入目标位置
+- 如无法判断，写入当日 Daily 的 Inbox 区块
+
+**创建每日笔记**
+- 路径：`Daily/YYYY-MM-DD.md`
+- 使用模板：`Templates/daily-note.md`
+
+**归档内容**
+- 项目完成 → 整体移至 `Archives/Projects/`
+- 领域停止 → 整体移至 `Archives/Areas/`
+- 命名加日期前缀：`2026-03 项目名称`
+
+**禁止事项**
+- 不要在 `Templates/` 中创建实际内容笔记
+- 不要在 `Archives/` 中创建新内容（只归入，不新建）
+- 不要让 `Clippings/` 长期堆积超过 20 个文件
+
+---
+
+## 各文件夹详细规则
+
+每个子文件夹均有独立的 `AGENTS.md`，遇到具体操作时请进一步查阅。
