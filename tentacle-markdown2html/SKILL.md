@@ -1,6 +1,6 @@
 ---
 name: tentacle-markdown2html
-description: Enterprise markdown-to-html renderer via API service. Sends markdown + templateId to api.tentacle.pro and writes returned html locally.
+description: Enterprise markdown-to-html renderer via API service. Sends markdown to api.tentacle.pro and writes returned html locally.
 ---
 
 # tentacle-markdown2html (Enterprise Edition)
@@ -11,32 +11,29 @@ Call enterprise rendering service instead of local renderer:
 
 - Endpoint: `https://api.tentacle.pro/markdown2html`
 - Auth: `API_KEY` from `.agents/skills/.env`
-- Supports per-request `templateId`
 
 ## Runtime
 
 ```bash
-bun .agents/skills/tentacle-markdown2html/scripts/main.ts <markdown_file> --template <templateId> [options]
+bun .agents/skills/tentacle-markdown2html/scripts/main.ts <markdown_file> [options]
 ```
 
 ## Shared .env (`.agents/skills/.env`)
 
 ```dotenv
-API_KEY=tentacle-xxx
-TENTACLE_BASE_URL=https://api.tentacle.pro
+API_KEY=tpk-xxx
 ```
 
 ## Input/Output
 
 - Input: markdown file
-- Request payload: `{ markdown, templateId, title? }`
+- Request payload: `{ markdown, title? }`
 - Output: html file (default same-name `.html`)
 
 ## Options
 
 | Flag | Description |
 |------|-------------|
-| `--template <id>` | Template ID, default `preset-classic` |
 | `--output <path>` | Output HTML path |
 | `--title <text>` | Title override |
 | `--summary <text>` | Article summary (max 120 chars). Injected as `summary:` into frontmatter so the renderer displays it as a themed lead block after the h1. Use this when the markdown has no frontmatter or when the agent dynamically generates a summary. |
@@ -56,7 +53,6 @@ TENTACLE_BASE_URL=https://api.tentacle.pro
 ## Example
 
 ```bash
-bun .agents/skills/tentacle-markdown2html/scripts/main.ts 02\ Projects/article.md \
-  --template preset-classic \
+bun .agents/skills/tentacle-markdown2html/scripts/main.ts "02 Projects/article.md" \
   --summary "早餐是一个向量空间。煎饼、可丽饼和炒蛋安置在一个单纯形上，是否存在从未被探索的'暗早餐'？"
 ```
