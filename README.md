@@ -24,7 +24,8 @@
 - 如果安装了Bun环境，可以使用以下命令安装技能：
 `bunx skills add tentacle-pro/skills`
 
-在`.agents/skills/` 目录下新建`.env` 文件，粘贴以下内容并按你的情况修改：
+在`.agents/skills/` 目录下新建`.env` 文件，复制`env.sample`中的内容并按你的情况修改：
+
 
 ```dotenv
 # ----------------------
