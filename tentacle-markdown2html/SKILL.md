@@ -37,7 +37,20 @@ API_KEY=tpk-xxx
 | `--output <path>` | Output HTML path |
 | `--title <text>` | Title override |
 | `--summary <text>` | Article summary (max 120 chars). Injected as `summary:` into frontmatter so the renderer displays it as a themed lead block after the h1. Use this when the markdown has no frontmatter or when the agent dynamically generates a summary. |
+| `--template <id>` | Template ID (default: `preset-classic`). See preset list below. |
 | `--dry-run` | Fetch only, skip file write |
+
+## Preset Templates
+
+| Template ID | 名称 | 特色 |
+|---|---|---|
+| `preset-classic` | 经典 | 平衡的信息密度与阅读舒适度（默认） |
+| `preset-grace` | 优雅 | 柔和色彩，适合观点表达和品牌内容 |
+| `preset-simple` | 简洁 | 去装饰，适合知识密集型内容 |
+| `preset-sports` | 运动风 | 橙绿双色渐变，活力动感 |
+| `preset-warm` | 温暖 | 砖红色调，贴近原生公众号体验 |
+| `preset-elegant-green` | 精致·翡翠绿 | 层次丰富，适合品牌内容与知识型文章 |
+| `preset-liguan` | 理观 | 锈红铜金，大号序号二级标题（`## 01 标题` 语法），适合地理/自然/人文深度长文 |
 
 ## Preprocessing
 

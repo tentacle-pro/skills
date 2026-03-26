@@ -107,7 +107,10 @@ function compressLocalImageIfNeeded(inputPath: string, baseDir: string): string 
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "tentacle-post2wechat-"));
   const outputPath = path.join(tempDir, `${path.basename(absInput, path.extname(absInput))}.jpg`);
 
-  const currentScriptDir = path.dirname(new URL(import.meta.url).pathname);
+  let currentScriptDir = path.dirname(new URL(import.meta.url).pathname);
+  if (currentScriptDir.includes("%")) {
+    currentScriptDir = decodeURIComponent(currentScriptDir);
+  }
   const cmd = [
     path.join(path.dirname(currentScriptDir), "../baoyu-compress-image/scripts/main.ts"),
     absInput,
