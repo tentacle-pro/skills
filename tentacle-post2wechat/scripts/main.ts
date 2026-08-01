@@ -3,6 +3,21 @@ import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
 import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
+
+// fileURLToPath handles URL-encoded characters (e.g. Chinese in vault path)
+const scriptDir = path.dirname(fileURLToPath(import.meta.url));
+const tempDirs: string[] = [];
+
+function cleanupTempDirs(): void {
+  for (const dir of tempDirs.splice(0)) {
+    try {
+      fs.rmSync(dir, { recursive: true, force: true });
+    } catch {
+      // ignore cleanup errors
+    }
+  }
+}
 
 interface CliArgs {
   input: string;
@@ -80,12 +95,12 @@ function inferSummaryFromHtml(html: string): string {
 }
 
 function findFirstImage(html: string): string | undefined {
-  const m = html.match(/<img[^>]*\ssrc=["']([^"']+)["'][^>]*>/i);
+  const m = html.match(/<img[^>]*\ssrc\s*=\s*["']?([^"'\s>]+)["']?[^>]*>/i);
   return m?.[1];
 }
 
 function extractImageSources(html: string): string[] {
-  const matches = [...html.matchAll(/<img[^>]*\ssrc=["']([^"']+)["'][^>]*>/gi)];
+  const matches = [...html.matchAll(/<img[^>]*\ssrc\s*=\s*["']?([^"'\s>]+)["']?[^>]*>/gi)];
   return matches.map((m) => m[1]!).filter(Boolean);
 }
 
@@ -105,14 +120,11 @@ function compressLocalImageIfNeeded(inputPath: string, baseDir: string): string 
   }
 
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "tentacle-post2wechat-"));
+  tempDirs.push(tempDir);
   const outputPath = path.join(tempDir, `${path.basename(absInput, path.extname(absInput))}.jpg`);
 
-  let currentScriptDir = path.dirname(new URL(import.meta.url).pathname);
-  if (currentScriptDir.includes("%")) {
-    currentScriptDir = decodeURIComponent(currentScriptDir);
-  }
   const cmd = [
-    path.join(path.dirname(currentScriptDir), "../baoyu-compress-image/scripts/main.ts"),
+    path.join(scriptDir, "../../baoyu-compress-image/scripts/main.ts"),
     absInput,
     "--format", "jpeg",
     "--quality", "65",
@@ -190,7 +202,6 @@ async function main(): Promise<void> {
   if (!fs.existsSync(inputPath)) throw new Error(`Input html not found: ${inputPath}`);
   const htmlBaseDir = path.dirname(inputPath);
 
-  const scriptDir = path.dirname(new URL(import.meta.url).pathname);
   const env = loadEnvFile(path.resolve(scriptDir, "../../.env"));
   const isDev = (process.env.NODE_ENV || env.NODE_ENV) === 'development';
   const defaultBaseUrl = isDev ? 'http://127.0.0.1:3001' : 'https://api.tentacle.pro';
@@ -243,6 +254,8 @@ async function main(): Promise<void> {
     replacementMap.set(src, uploaded.url);
   }
 
+  cleanupTempDirs();
+
   for (const [from, to] of replacementMap) {
     html = html.replaceAll(`src="${from}"`, `src="${to}"`);
     html = html.replaceAll(`src='${from}'`, `src="${to}"`);
@@ -252,6 +265,8 @@ async function main(): Promise<void> {
   const coverResp = await uploadByPathOrUrl(baseUrl, apiKey, "/post2wechat/upload/permanent-image", compressedCover);
   const thumbMediaId = coverResp?.media_id;
   if (!thumbMediaId) throw new Error("Cover upload returned no media_id");
+
+  cleanupTempDirs();
 
   const payload = {
     title,

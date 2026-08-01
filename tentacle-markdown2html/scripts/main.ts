@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 interface CliArgs {
   input: string;
@@ -94,10 +95,11 @@ async function main(): Promise<void> {
   const inputPath = path.resolve(args.input);
   if (!fs.existsSync(inputPath)) throw new Error(`Input not found: ${inputPath}`);
 
-  const scriptDir = path.dirname(new URL(import.meta.url).pathname);
+  // fileURLToPath handles URL-encoded characters (e.g. Chinese in vault path)
   // main.ts is at .agents/skills/tentacle-markdown2html/scripts/main.ts
   // .env is at .agents/skills/.env
   // So we need to go up 2 levels: scripts -> tentacle-markdown2html -> .agents/skills
+  const scriptDir = path.dirname(fileURLToPath(import.meta.url));
   const sharedEnvPath = path.resolve(scriptDir, "../../.env");
   const env = loadEnvFile(sharedEnvPath);
 
@@ -144,7 +146,10 @@ async function main(): Promise<void> {
   }
 
   const html = normalizeResultHtml(data);
-  const defaultOutputPath = inputPath.replace(/\.md$/i, ".html");
+  const defaultOutputPath = path.join(
+    path.dirname(inputPath),
+    `${path.basename(inputPath, path.extname(inputPath))}.html`
+  );
   let resolvedOutput = path.resolve(args.output || defaultOutputPath);
   // 如果 --output 指向的是一个目录，则在该目录下写同名 .html
   if (args.output && fs.existsSync(resolvedOutput) && fs.statSync(resolvedOutput).isDirectory()) {
@@ -153,6 +158,11 @@ async function main(): Promise<void> {
   const outputPath = resolvedOutput;
 
   if (!args.dryRun) {
+    // Backup existing output before overwriting (same convention as baoyu-markdown-to-html)
+    if (fs.existsSync(outputPath)) {
+      const ts = new Date().toISOString().replace(/[-:T]/g, "").slice(0, 14);
+      fs.renameSync(outputPath, `${outputPath}.bak-${ts}`);
+    }
     fs.writeFileSync(outputPath, html, "utf-8");
   }
 
